@@ -1,0 +1,313 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --ink: #0e0c08;
+  --parchment: #e8d5a3;
+  --blood: #8b1a1a;
+  --frost: #5b8fa8;
+  --gold: #c9a84c;
+  --ash: #4a4540;
+  --mist: #8c8070;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #0e0c08;
+  color: #e8d5a3;
+  font-family: var(--font-crimson), Georgia, serif;
+  font-size: 18px;
+  line-height: 1.7;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #1a1710;
+}
+::-webkit-scrollbar-thumb {
+  background: #4a4540;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #c9a84c;
+}
+
+/* Typography */
+.font-norse {
+  font-family: var(--font-cinzel), serif;
+  letter-spacing: 0.05em;
+}
+
+/* Texture overlay */
+.texture-overlay::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: 
+    radial-gradient(ellipse at 20% 20%, rgba(139, 26, 26, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(91, 143, 168, 0.06) 0%, transparent 50%),
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Rune decorations */
+.rune-border {
+  position: relative;
+}
+.rune-border::after {
+  content: '᛭';
+  position: absolute;
+  color: rgba(201, 168, 76, 0.3);
+  font-size: 0.6rem;
+}
+
+/* Glow effects */
+.glow-gold {
+  box-shadow: 0 0 20px rgba(201, 168, 76, 0.2), inset 0 0 20px rgba(201, 168, 76, 0.05);
+}
+
+.glow-blood {
+  box-shadow: 0 0 20px rgba(139, 26, 26, 0.3);
+}
+
+.glow-frost {
+  box-shadow: 0 0 20px rgba(91, 143, 168, 0.2);
+}
+
+/* Card styles */
+.saga-card {
+  background: linear-gradient(135deg, #1a1710 0%, #252118 100%);
+  border: 1px solid rgba(201, 168, 76, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.saga-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(201, 168, 76, 0.03) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+/* Button styles */
+.btn-saga {
+  font-family: var(--font-cinzel), serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.15em;
+  font-weight: 600;
+  padding: 0.75rem 2rem;
+  background: linear-gradient(135deg, #8b1a1a 0%, #6b1414 100%);
+  border: 1px solid rgba(201, 168, 76, 0.4);
+  color: #e8d5a3;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  text-transform: uppercase;
+}
+
+.btn-saga::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(201, 168, 76, 0.15), transparent);
+  transition: left 0.5s ease;
+}
+
+.btn-saga:hover::before {
+  left: 100%;
+}
+
+.btn-saga:hover {
+  background: linear-gradient(135deg, #a01e1e 0%, #8b1a1a 100%);
+  border-color: rgba(201, 168, 76, 0.7);
+  box-shadow: 0 0 20px rgba(139, 26, 26, 0.4), 0 0 40px rgba(201, 168, 76, 0.1);
+}
+
+.btn-secondary {
+  background: linear-gradient(135deg, #252118 0%, #1a1710 100%);
+  border: 1px solid rgba(201, 168, 76, 0.3);
+}
+
+.btn-secondary:hover {
+  background: linear-gradient(135deg, #312b20 0%, #252118 100%);
+  border-color: rgba(201, 168, 76, 0.6);
+  box-shadow: 0 0 15px rgba(201, 168, 76, 0.15);
+}
+
+/* Input styles */
+.saga-input {
+  background: rgba(14, 12, 8, 0.8);
+  border: 1px solid rgba(201, 168, 76, 0.25);
+  color: #e8d5a3;
+  font-family: var(--font-crimson), serif;
+  font-size: 1rem;
+  padding: 0.875rem 1.25rem;
+  outline: none;
+  transition: all 0.3s ease;
+  width: 100%;
+}
+
+.saga-input::placeholder {
+  color: rgba(140, 128, 112, 0.6);
+}
+
+.saga-input:focus {
+  border-color: rgba(201, 168, 76, 0.6);
+  box-shadow: 0 0 0 1px rgba(201, 168, 76, 0.2), 0 0 20px rgba(201, 168, 76, 0.05);
+}
+
+/* Dividers */
+.rune-divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: rgba(201, 168, 76, 0.4);
+  font-size: 0.7rem;
+  letter-spacing: 0.3em;
+}
+
+.rune-divider::before,
+.rune-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(201, 168, 76, 0.3), transparent);
+}
+
+/* Prose in chat */
+.saga-prose {
+  font-family: var(--font-crimson), serif;
+  line-height: 1.8;
+  color: #e8d5a3;
+}
+
+.saga-prose p { margin-bottom: 0.75rem; }
+.saga-prose strong { color: #c9a84c; font-weight: 600; }
+.saga-prose em { font-style: italic; color: #eedcb4; }
+.saga-prose code {
+  background: rgba(201, 168, 76, 0.1);
+  padding: 0.1em 0.4em;
+  border-radius: 3px;
+  font-size: 0.85em;
+  font-family: monospace;
+}
+
+/* Loading animation */
+@keyframes runeReveal {
+  0% { opacity: 0; transform: translateY(5px) scale(0.95); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.rune-reveal {
+  animation: runeReveal 0.4s ease forwards;
+}
+
+/* Flip card */
+.flip-card {
+  perspective: 1000px;
+}
+
+.flip-card-inner {
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-style: preserve-3d;
+  position: relative;
+}
+
+.flip-card.flipped .flip-card-inner {
+  transform: rotateY(180deg);
+}
+
+.flip-card-front,
+.flip-card-back {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.flip-card-back {
+  transform: rotateY(180deg);
+  position: absolute;
+  inset: 0;
+}
+
+/* Progress bar */
+.saga-progress {
+  background: rgba(201, 168, 76, 0.1);
+  height: 4px;
+  position: relative;
+  overflow: hidden;
+}
+
+.saga-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #8b1a1a, #c9a84c);
+  transition: width 0.5s ease;
+  position: relative;
+}
+
+.saga-progress-fill::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 20px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2));
+}
+
+/* Tab navigation */
+.saga-tab {
+  font-family: var(--font-cinzel), serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 0.6rem 1.5rem;
+  color: #8c8070;
+  border-bottom: 2px solid transparent;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.saga-tab:hover {
+  color: #e8d5a3;
+}
+
+.saga-tab.active {
+  color: #c9a84c;
+  border-bottom-color: #c9a84c;
+}
+
+/* Decorative Norse patterns */
+.knotwork-left::before,
+.knotwork-right::after {
+  font-size: 1.2rem;
+  color: rgba(201, 168, 76, 0.3);
+  font-family: var(--font-cinzel);
+}
+.knotwork-left::before { content: '⟨ '; }
+.knotwork-right::after { content: ' ⟩'; }
+
+/* Selection */
+::selection {
+  background: rgba(139, 26, 26, 0.4);
+  color: #e8d5a3;
+}
