@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useState } from 'react'
+import { motion } from 'framer-motion'
 import { generateFlashcards, Flashcard } from '@/lib/api'
 
 interface Props {
@@ -21,10 +21,10 @@ const DIFFICULTY_RUNES = {
 }
 
 export default function FlashcardSection({ sessionId }: Props) {
-  const [cards, setCards] = useState<Flashcard[]>([])
-  const [current, setCurrent] = useState(0)
-  const [flipped, setFlipped] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const [cards, setCards]       = useState<Flashcard[]>([])
+  const [current, setCurrent]   = useState(0)
+  const [flipped, setFlipped]   = useState(false)
+  const [loading, setLoading]   = useState(false)
   const [mastered, setMastered] = useState<Set<string>>(new Set())
   const [generated, setGenerated] = useState(false)
 
@@ -44,14 +44,10 @@ export default function FlashcardSection({ sessionId }: Props) {
     }
   }
 
-  const next = () => {
+  const goTo = (idx: number) => {
     setFlipped(false)
-    setTimeout(() => setCurrent((c) => Math.min(c + 1, cards.length - 1)), 200)
-  }
-
-  const prev = () => {
-    setFlipped(false)
-    setTimeout(() => setCurrent((c) => Math.max(c - 1, 0)), 200)
+    // tiny delay so the un-flip animation plays before slide
+    setTimeout(() => setCurrent(idx), 250)
   }
 
   const toggleMaster = (id: string) => {
@@ -62,6 +58,7 @@ export default function FlashcardSection({ sessionId }: Props) {
     })
   }
 
+  /* ── Idle state ──────────────────────────────────────────── */
   if (!generated) {
     return (
       <div className="flex flex-col items-center justify-center py-16 gap-6">
@@ -76,22 +73,21 @@ export default function FlashcardSection({ sessionId }: Props) {
           disabled={loading}
           className="btn-saga flex items-center gap-3 disabled:opacity-50"
         >
-          {loading ? (
-            <span className="animate-pulse">ᚠ ᚢ ᚦ ᚨ ᚱ ᚲ</span>
-          ) : (
-            '⚔ Forge 12 Flashcards'
-          )}
+          {loading
+            ? <span className="animate-pulse font-norse tracking-widest">ᚠ ᚢ ᚦ ᚨ ᚱ ᚲ</span>
+            : '⚔ Forge 12 Flashcards'}
         </button>
       </div>
     )
   }
 
-  const card = cards[current]
+  const card     = cards[current]
   const progress = (mastered.size / cards.length) * 100
 
   return (
     <div className="space-y-6">
-      {/* Stats bar */}
+
+      {/* ── Stats bar ─────────────────────────────────────── */}
       <div className="flex items-center justify-between text-sm">
         <span className="font-norse text-gold/80 tracking-wide text-xs">
           {current + 1} / {cards.length} SCROLLS
@@ -107,79 +103,91 @@ export default function FlashcardSection({ sessionId }: Props) {
         </button>
       </div>
 
-      {/* Progress */}
+      {/* ── Progress bar ──────────────────────────────────── */}
       <div className="saga-progress">
         <div className="saga-progress-fill" style={{ width: `${progress}%` }} />
       </div>
 
-      {/* Card */}
-      <AnimatePresence mode="wait">
+      {/* ── Flip Card ─────────────────────────────────────── */}
+      {/*
+        KEY FIXES:
+        1. No AnimatePresence wrapping the card — it was remounting and
+           destroying the CSS transition on every navigation.
+        2. The `flipped` class goes on the OUTER .flip-card div so the CSS
+           selector `.flip-card.flipped .flip-card-inner` matches correctly.
+        3. Slide animation is on a wrapper div keyed by `current`, NOT on the
+           flip-card itself, so both animations are independent.
+      */}
+      <div style={{ perspective: '1000px', height: '280px' }}>
         <motion.div
           key={current}
-          initial={{ opacity: 0, x: 20 }}
+          initial={{ opacity: 0, x: 30 }}
           animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
-          transition={{ duration: 0.25 }}
-          className="flip-card h-64 cursor-pointer select-none"
-          style={{ height: '280px' }}
-          onClick={() => setFlipped(!flipped)}
+          transition={{ duration: 0.22, ease: 'easeOut' }}
+          style={{ height: '100%' }}
         >
-          <div className={`flip-card-inner w-full h-full ${flipped ? 'flipped' : ''}`} style={{ height: '280px' }}>
-            {/* Front */}
-            <div className="flip-card-front w-full h-full saga-card p-8 flex flex-col justify-between">
-              <div className="flex items-start justify-between">
-                <span
-                  className="font-norse text-xs tracking-widest px-2 py-1 border"
-                  style={{
-                    color: DIFFICULTY_COLORS[card.difficulty],
-                    borderColor: `${DIFFICULTY_COLORS[card.difficulty]}40`,
-                  }}
-                >
-                  {DIFFICULTY_RUNES[card.difficulty]} {card.difficulty.toUpperCase()}
-                </span>
-                <span className="text-xs text-mist font-norse tracking-wide">{card.category}</span>
-              </div>
+          {/* Outer div gets the `flipped` class — matches CSS selector */}
+          <div
+            className={`flip-card w-full h-full cursor-pointer select-none${flipped ? ' flipped' : ''}`}
+            onClick={() => setFlipped((f) => !f)}
+          >
+            {/* Inner rotates */}
+            <div className="flip-card-inner w-full h-full">
 
-              <div className="text-center">
-                <p className="font-norse text-parchment text-lg leading-relaxed">
-                  {card.front}
+              {/* ── FRONT ── */}
+              <div className="flip-card-front w-full h-full saga-card p-8 flex flex-col justify-between">
+                <div className="flex items-start justify-between">
+                  <span
+                    className="font-norse text-xs tracking-widest px-2 py-1 border"
+                    style={{
+                      color: DIFFICULTY_COLORS[card.difficulty] ?? '#c9a84c',
+                      borderColor: `${DIFFICULTY_COLORS[card.difficulty] ?? '#c9a84c'}40`,
+                    }}
+                  >
+                    {DIFFICULTY_RUNES[card.difficulty] ?? 'ᚠ'} {card.difficulty?.toUpperCase() ?? 'MEDIUM'}
+                  </span>
+                  <span className="text-xs text-mist font-norse tracking-wide">{card.category}</span>
+                </div>
+
+                <div className="text-center px-2">
+                  <p className="font-norse text-parchment text-lg leading-relaxed">{card.front}</p>
+                </div>
+
+                <p className="text-center text-mist/60 text-xs font-body italic">
+                  Tap to reveal the answer
                 </p>
               </div>
 
-              <p className="text-center text-mist/60 text-xs font-body italic">
-                Tap to reveal the answer
-              </p>
-            </div>
+              {/* ── BACK ── */}
+              <div
+                className="flip-card-back w-full h-full saga-card p-8 flex flex-col justify-between"
+                style={{
+                  background: 'linear-gradient(135deg, #1a0e0e 0%, #251818 100%)',
+                  borderColor: 'rgba(139,26,26,0.3)',
+                }}
+              >
+                <div className="flex items-center justify-center">
+                  <span className="text-blood/60 font-norse text-xs tracking-widest">ANSWER</span>
+                </div>
 
-            {/* Back */}
-            <div className="flip-card-back w-full saga-card p-8 flex flex-col justify-between"
-              style={{
-                background: 'linear-gradient(135deg, #1a0e0e 0%, #251818 100%)',
-                borderColor: 'rgba(139,26,26,0.3)',
-              }}
-            >
-              <div className="flex items-center justify-center">
-                <span className="text-blood/60 font-norse text-xs tracking-widest">ANSWER</span>
-              </div>
+                <div className="text-center px-2">
+                  <p className="font-body text-parchment text-base leading-relaxed">{card.back}</p>
+                </div>
 
-              <div className="text-center">
-                <p className="font-body text-parchment text-base leading-relaxed">
-                  {card.back}
+                <p className="text-center text-mist/60 text-xs font-body italic">
+                  Tap again to return
                 </p>
               </div>
 
-              <p className="text-center text-mist/60 text-xs font-body italic">
-                Tap again to return
-              </p>
             </div>
           </div>
         </motion.div>
-      </AnimatePresence>
+      </div>
 
-      {/* Navigation */}
+      {/* ── Navigation ────────────────────────────────────── */}
       <div className="flex items-center justify-between gap-4">
         <button
-          onClick={prev}
+          onClick={() => goTo(current - 1)}
           disabled={current === 0}
           className="btn-saga btn-secondary disabled:opacity-30 flex-1 py-2 text-xs"
         >
@@ -198,7 +206,7 @@ export default function FlashcardSection({ sessionId }: Props) {
         </button>
 
         <button
-          onClick={next}
+          onClick={() => goTo(current + 1)}
           disabled={current === cards.length - 1}
           className="btn-saga disabled:opacity-30 flex-1 py-2 text-xs"
         >
@@ -206,22 +214,23 @@ export default function FlashcardSection({ sessionId }: Props) {
         </button>
       </div>
 
-      {/* Category dots */}
+      {/* ── Dot navigation ────────────────────────────────── */}
       <div className="flex justify-center gap-1 flex-wrap">
         {cards.map((c, i) => (
           <button
             key={c.id}
-            onClick={() => { setFlipped(false); setCurrent(i) }}
-            className={`w-2 h-2 rounded-full transition-all duration-300 ${
+            onClick={() => goTo(i)}
+            className={`h-2 rounded-full transition-all duration-300 ${
               i === current
                 ? 'bg-gold w-4'
                 : mastered.has(c.id)
-                ? 'bg-frost/60'
-                : 'bg-ash hover:bg-mist'
+                ? 'bg-frost/60 w-2'
+                : 'bg-ash hover:bg-mist w-2'
             }`}
           />
         ))}
       </div>
+
     </div>
   )
 }
