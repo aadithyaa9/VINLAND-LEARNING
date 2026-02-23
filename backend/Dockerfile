@@ -1,9 +1,8 @@
-# Pin exact stable base (no rolling tags)
 FROM python:3.11.8-slim-bookworm
 
 WORKDIR /app
 
-# Install system dependencies safely
+# Install system dependencies
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         build-essential \
@@ -11,19 +10,20 @@ RUN apt-get update \
         ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python deps
-COPY requirements.txt .
+# Copy requirements from backend folder explicitly
+COPY backend/requirements.txt ./requirements.txt
+
 RUN pip install --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt
 
-# Install yt-dlp binary
+# Install yt-dlp
 RUN curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp \
     -o /usr/local/bin/yt-dlp \
     && chmod a+rx /usr/local/bin/yt-dlp
 
-# Copy app
-COPY . .
+# Copy backend source code only
+COPY backend/ .
 
 EXPOSE 8000
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
+CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000} --workers 2"]
